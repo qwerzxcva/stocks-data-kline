@@ -1,0 +1,44 @@
+# 夜间全市场 K 线增量补录 (每日 03:00 CST = 19:00 UTC)
+# 私有仓; 全市场 5343 只 × 3 频率, 限速 0.25s ≈ 65 分钟/次
+# 免费额度 2000 分钟/月内 (每日 ~65 分钟 × 22 天 ≈ 1430 分钟/月) ✅
+name: nightly-kline
+on:
+  schedule:
+    - cron: '0 19 * * *'    # 03:00 CST 每日 (含周末, 补全数据)
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v4
+        with: { token: ${{ secrets.GITHUB_TOKEN }} }
+      - uses: actions/checkout@v4
+        with:
+          repository: qwerzxcva/stocks-tools
+          path: tools-repo
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - uses: actions/setup-python@v5
+        with: { python-version: '3.x' }
+      - name: Index + global klines
+        run: |
+          python3 tools-repo/tools/fetch_history.py ${{ github.workspace }}/data/kline/history
+          python3 tools-repo/tools/save_global_quotes.py
+      - name: Full market klines (resumable, WAF-aware)
+        env:
+          STOCKS_KLINE_OUT: ${{ github.workspace }}/data/bulk
+        run: python3 tools-repo/tools/fetch_all_market.py 1
+      - name: Split to per-code
+        run: python3 tools-repo/tools/split_allmarket.py
+      - name: Commit & push
+        run: |
+          git config user.name "stocks-bot"
+          git config user.email "41888888888+stocks-bot@users.noreply.github.com"
+          git add -A
+          ts=$(TZ=Asia/Shanghai date '+%Y%m%d_%H%M')
+          git diff --quiet HEAD && echo "no changes" || {
+            git commit -m "nightly-kline $ts" && \
+            git -c http.version=HTTP/1.1 push origin main
+          }
