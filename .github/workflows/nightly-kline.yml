@@ -38,7 +38,7 @@ jobs:
           STOCKS_KLINE_OUT: ${{ github.workspace }}/data/bulk
           STOCKS_UNIVERSE_FILE: ${{ github.workspace }}/data/bulk/universe.csv
           STOCKS_KLINE_WAF_BUDGET: "360"
-          STOCKS_KLINE_CKPT_WALL: "900"
+          STOCKS_KLINE_CKPT_WALL: "600"
         run: python3 tools-repo/tools/fetch_all_market.py 3
       - name: Split to per-code
         env:
