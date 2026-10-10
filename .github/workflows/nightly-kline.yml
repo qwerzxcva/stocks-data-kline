@@ -33,10 +33,12 @@ jobs:
         run: |
           python3 tools-repo/tools/fetch_history.py ${{ github.workspace }}/data/kline/history
           python3 tools-repo/tools/save_global_quotes.py
-      - name: Full market klines (resumable, WAF-aware, 3 workers + 100码自动 checkpoint commit)
+      - name: Full market klines (resumable, WAF-aware, 3 workers + checkpoint)
         env:
           STOCKS_KLINE_OUT: ${{ github.workspace }}/data/bulk
           STOCKS_UNIVERSE_FILE: ${{ github.workspace }}/data/bulk/universe.csv
+          STOCKS_KLINE_WAF_BUDGET: "360"
+          STOCKS_KLINE_CKPT_WALL: "900"
         run: python3 tools-repo/tools/fetch_all_market.py 3
       - name: Split to per-code
         env:
