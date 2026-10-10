@@ -9,7 +9,7 @@ permissions:
 jobs:
   collect:
     runs-on: ubuntu-latest
-    timeout-minutes: 90
+    timeout-minutes: 360
     steps:
       - uses: actions/checkout@v4
         with:
@@ -33,11 +33,11 @@ jobs:
         run: |
           python3 tools-repo/tools/fetch_history.py ${{ github.workspace }}/data/kline/history
           python3 tools-repo/tools/save_global_quotes.py
-      - name: Full market klines (resumable, WAF-aware, 1 worker in Actions)
+      - name: Full market klines (resumable, WAF-aware, 2 workers)
         env:
           STOCKS_KLINE_OUT: ${{ github.workspace }}/data/bulk
           STOCKS_UNIVERSE_FILE: ${{ github.workspace }}/data/bulk/universe.csv
-        run: python3 tools-repo/tools/fetch_all_market.py 1
+        run: python3 tools-repo/tools/fetch_all_market.py 2
       - name: Split to per-code
         env:
           STOCKS_KLINE_SRC: ${{ github.workspace }}/data/bulk
