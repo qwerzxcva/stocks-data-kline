@@ -16,7 +16,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/checkout@v4
         with:
-          repository: qwerzxcva/stocks-tools
+          repository: qwerzxcva/t4
           path: tools-repo
           token: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/setup-python@v5
